@@ -1,0 +1,176 @@
+Turbo Assembler	 Version 2.0	    03/22/23 19:30:16	    Page 1
+pract2a.asm
+
+
+
+      1				     ;**************************************************************************
+      2				     ;SISTEMAS BASADOS EN MICROPROCESADORES 2291
+      3				     ;PRÁCTICA	2
+      4				     ;EDUARDO JUNOY ORTEGA
+      5				     ;**************************************************************************
+      6				     ; DEFINICION DEL SEGMENTO DE DATOS
+      7	0000			     DATOS SEGMENT
+      8	0000  01 02 02 04	     VECTOR1 DB	1,2,2,4
+      9	0004  04 02 05 01	     VECTOR2 DB	4,2,5,1
+     10	0008  03 02 04 01	     VECTOR3 DB	3,2,4,1
+     11	000C  4E 6F 20 76 C3 A1	6C+  TEXTO1 DB "No válido.Repetición", 13, 10, "$"
+     12	      69 64 6F 2E 52 65	70+
+     13	      65 74 69 63 69 C3	B3+
+     14	      6E 0D 0A 24
+     15	0025  4E 6F 20 76 C3 A1	6C+  TEXTO2 DB "No válido. Números diferentes	1-4", 13, 10, "$"
+     16	      69 64 6F 2E 20 4E	C3+
+     17	      BA 6D 65 72 6F 73	20+
+     18	      64 69 66 65 72 65	6E+
+     19	      74 65 73 20 31 2D	34+
+     20	      0D 0A 24
+     21	004B  43 6F 72 72 65 63	74+  TEXTO3 DB "Correcto", 13, 10, "$"
+     22	      6F 0D 0A 24
+     23	0056  01		     COUNT1 DB 1
+     24	0057  01		     COUNT2 DB 1
+     25	0058			     DATOS ENDS
+     26				     ;**************************************************************************
+     27				     ; DEFINICION DEL SEGMENTO DE PILA
+     28	0000			     PILA SEGMENT STACK	"STACK"
+     29	0000  40*(00)		     DB	40H DUP	(0) ;ejemplo de	inicialización, 64 bytes inicializados	a 0
+     30	0040			     PILA ENDS
+     31				     ;**************************************************************************
+     32				     ; DEFINICION DEL SEGMENTO EXTRA
+     33	0000			     EXTRA SEGMENT
+     34	0000  0000 0000		     RESULT DW 0,0 ;ejemplo de inicialización.	2 PALABRAS (4 BYTES)
+     35	0004			     EXTRA ENDS
+     36				     ;**************************************************************************
+     37				     ; DEFINICION DEL SEGMENTO DE CODIGO
+     38	0000			     CODE SEGMENT
+     39				     ASSUME CS:	CODE, DS: DATOS, ES: EXTRA, SS:	PILA
+     40				     ; COMIENZO	DEL PROCEDIMIENTO PRINCIPAL
+     41	0000			     INICIO PROC
+     42				     ; INICIALIZA LOS REGISTROS	DE SEGMENTO CON	SU VALOR
+     43	0000  B8 0000s		     MOV AX, DATOS
+     44	0003  8E D8		     MOV DS, AX
+     45	0005  B8 0000s		     MOV AX, PILA
+     46	0008  8E D0		     MOV SS, AX
+     47	000A  B8 0000s		     MOV AX, EXTRA
+     48	000D  8E C0		     MOV ES, AX
+     49	000F  BC 0040		     MOV SP, 64	; CARGA	EL PUNTERO DE PILA CON EL VALOR	MAS ALTO
+     50				     ; FIN DE LAS INICIALIZACIONES
+     51				     ; COMIENZO	DEL PROGRAMA
+     52				     ;Datos proporcionados:
+     53
+     54				     ;REGISTROS
+     55				     ;AX: operaciones
+     56				     ;BX: guardar resultados offset o commparador
+     57				     ;CX: contador
+Turbo Assembler	 Version 2.0	    03/22/23 19:30:16	    Page 2
+pract2a.asm
+
+
+
+     58				     ;DX: general
+     59				     ;SI y DI: apuntadores, guarda valores (para arrays)
+     60				     ;SP: pila
+     61				     ;SS: segmento de pila
+     62				     ;DS: segmento de datos
+     63				     ;ES: segmento extra
+     64				     ;CS: segmento de código
+     65
+     66	0012  B9 0004		     MOV CX, 4
+     67
+     68	0015  E8 0003		     CALL BUCLE1
+     69	0018  EB 2C 90		     JMP FIN
+     70
+     71	001B			     INICIO ENDP
+     72				     ; FIN DEL SEGMENTO	DE CODIGO
+     73				     ;PROCEDIMIENTOS
+     74	001B			     BUCLE1:
+     75	001B  49			     DEC CX
+     76	001C  83 F9 00			     CMP CX, 0
+     77	001F  74 25			     JE	FIN
+     78	0021				     BUCLE2:
+     79	0021  80 3E 0056r 03			     CMP COUNT1, 3					     ;comapara i con 3
+     80	0026  74 F3				     JE	BUCLE1
+     81	0028  38				     CMP VECTOR1[CX], VECTOR1[CX-COUNT1]     ;compara C[3] y C[3-i]
+**Error** pract2a.asm(72) Can't	subtract dissimilar relative quantities
+     82	0029  74 06				     JE	MOSTRARTEXTO1					     ;MENSAJE DE ERROR
+     83	002B  FE 06 0056r			     INC COUNT1							     ;i++
+     84	002F  EB F0				     JMP BUCLE2
+     85
+     86	0031			     MOSTRARTEXTO1:
+     87
+     88				     ; Si DS es	el segmento donde está	el texto a imprimir:
+     89	0031  BA 000Cr			     MOV DX, offset TEXTO1   ; DX : offset al inicio del texto a imprimir
+     90	0034  B4 09			     MOV AH, 9				     ; Número de función = 9 (imprimir string)
+     91	0036  CD 21			     INT 21H				     ; Ejecuta el servicio del sistema operativo
+     92
+     93	0038			     MOSTRARTEXTO2:
+     94
+     95				     ; Si DS es	el segmento donde está	el texto a imprimir:
+     96	0038  BA 0025r			     MOV DX, offset TEXTO2   ; DX : offset al inicio del texto a imprimir
+     97	003B  B4 09			     MOV AH, 9				     ; Número de función = 9 (imprimir string)
+     98	003D  CD 21			     INT 21H				     ; Ejecuta el servicio del sistema operativo
+     99
+    100	003F			     MOSTRARTEXTO3:
+    101
+    102				     ; Si DS es	el segmento donde está	el texto a imprimir:
+    103	003F  BA 004Br			     MOV DX, offset TEXTO3   ; DX : offset al inicio del texto a imprimir
+    104	0042  B4 09			     MOV AH, 9				     ; Número de función = 9 (imprimir string)
+    105	0044  CD 21			     INT 21H				     ; Ejecuta el servicio del sistema operativo
+    106
+    107	0046			     FIN:
+    108
+    109				     ; FIN DEL PROGRAMA
+    110	0046  B8 4C00			     MOV AX, 4C00H
+    111	0049  CD 21			     INT 21H
+    112	004B			     CODE ENDS
+    113				     ; FIN DEL PROGRAMA	INDICANDO DONDE	COMIENZA LA EJECUCION
+Turbo Assembler	 Version 2.0	    03/22/23 19:30:16	    Page 3
+pract2a.asm
+
+
+
+    114				     END INICIO
+Turbo Assembler	 Version 2.0	    03/22/23 19:30:16	    Page 4
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/22/23"
+??FILENAME			  Text	 "pract2a "
+??TIME				  Text	 "19:30:16"
+??VERSION			  Number 0200
+@CPU				  Text	 0101H
+@CURSEG				  Text	 CODE
+@FILENAME			  Text	 PRACT2A
+@WORDSIZE			  Text	 2
+BUCLE1				  Near	 CODE:001B
+BUCLE2				  Near	 CODE:0021
+COUNT1				  Byte	 DATOS:0056
+COUNT2				  Byte	 DATOS:0057
+FIN				  Near	 CODE:0046
+INICIO				  Near	 CODE:0000
+MOSTRARTEXTO1			  Near	 CODE:0031
+MOSTRARTEXTO2			  Near	 CODE:0038
+MOSTRARTEXTO3			  Near	 CODE:003F
+RESULT				  Word	 EXTRA:0000
+TEXTO1				  Byte	 DATOS:000C
+TEXTO2				  Byte	 DATOS:0025
+TEXTO3				  Byte	 DATOS:004B
+VECTOR1				  Byte	 DATOS:0000
+VECTOR2				  Byte	 DATOS:0004
+VECTOR3				  Byte	 DATOS:0008
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+CODE				  16  004B Para	  none
+DATOS				  16  0058 Para	  none
+EXTRA				  16  0004 Para	  none
+PILA				  16  0040 Para	  Stack	  STACK
+Turbo Assembler	 Version 2.0	    03/22/23 19:30:16	    Page 5
+Error Summary
+
+
+
+**Error** pract2a.asm(72) Can't	subtract dissimilar relative quantities
+

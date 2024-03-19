@@ -1,0 +1,116 @@
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:52	    Page 1
+pract1c.asm
+
+
+
+      1				     ;**************************************************************************
+      2				     ; SBM 2023. ESTRUCTURA BÁSICA DE UN PROGRAMA EN ENSAMBLADOR
+      3				     ;**************************************************************************
+      4				     ; DEFINICION DEL SEGMENTO DE DATOS
+      5	0000			     DATOS SEGMENT
+      6				     ;Reservar memoria para una	variable, VIVA_SBM2023,	de un byte de tamaño.
+      7	0000  ??		     VIVA_SBM2023 DB ?
+      8				     ;Reservar memoria para una	variable, BEBA,	de dos bytes de	tamaño,
+      9				     ;e	inicializarla con el valor CAFEH
+     10	0001  CAFE		     BEBA DW 0CAFEH
+     11				     ;Reservar 300 bytes para una tabla	llamada	TABLA300
+     12	0003  012C*(??)		     TABLA300 DB 300 DUP ?
+**Error** pract1c.asm(12) Need left parenthesis
+     13				     ;Guardar en memoria la cadena de texto “Este programa se	cuelga siempre.”, de nombre
+     14				     ;ERRORTOTAL2, para	agilizar la salida de mensajes en un programa de corrección
+     15				     ;automática de prácticas.
+     16	012F  45 73 74 65 20 70	72+  ERRORTOTAL2 DB "Este programa se cuelga siempre."
+     17	      6F 67 72 61 6D 61	20+
+     18	      73 65 20 63 75 65	6C+
+     19	      67 61 20 73 69 65	6D+
+     20	      70 72 65 2E
+     21	014F			     DATOS ENDS
+     22				     ;**************************************************************************
+     23				     ; DEFINICION DEL SEGMENTO DE PILA
+     24	0000			     PILA SEGMENT STACK	"STACK"
+     25	0000  40*(00)		     DB	40H DUP	(0) ;ejemplo de	inicialización, 64 bytes inicializados	a 0
+     26	0040			     PILA ENDS
+     27				     ;**************************************************************************
+     28				     ; DEFINICION DEL SEGMENTO EXTRA
+     29	0000			     EXTRA SEGMENT
+     30	0000  0000 0000		     RESULT DW 0,0 ;ejemplo de inicialización.	2 PALABRAS (4 BYTES)
+     31	0004			     EXTRA ENDS
+     32				     ;**************************************************************************
+     33				     ; DEFINICION DEL SEGMENTO DE CODIGO
+     34	0000			     CODE SEGMENT
+     35				     ASSUME CS:	CODE, DS: DATOS, ES: EXTRA, SS:	PILA
+     36				     ; COMIENZO	DEL PROCEDIMIENTO PRINCIPAL
+     37	0000			     INICIO PROC
+     38				     ; INICIALIZA LOS REGISTROS	DE SEGMENTO CON	SU VALOR
+     39	0000  B8 0000s		     MOV AX, DATOS
+     40	0003  8E D8		     MOV DS, AX
+     41	0005  B8 0000s		     MOV AX, PILA
+     42	0008  8E D0		     MOV SS, AX
+     43	000A  B8 0000s		     MOV AX, EXTRA
+     44	000D  8E C0		     MOV ES, AX
+     45	000F  BC 0040		     MOV SP, 64	; CARGA	EL PUNTERO DE PILA CON EL VALOR	MAS ALTO
+     46				     ; FIN DE LAS INICIALIZACIONES
+     47				     ; COMIENZO	DEL PROGRAMA
+     48				     ;Copiar el	segundo	carácter de la	cadena ERRORFATAL2 en la posición 63H de TABLA300
+     49	0012  A1 0131r		     MOV AX, ERRORTOTAL2[2]
+**Error** pract1c.asm(45) Operand types	do not match
+     50	0015  A3 0066r		     MOV TABLA300[63H],	AX
+**Error** pract1c.asm(46) Operand types	do not match
+     51				     ;Copiar el	contenido de la	variable BEBA a	partir de la posición 4 de TABLA300
+     52				     ;Se introduce EFAC
+     53	0018  A1 0001r		     MOV AX, BEBA
+     54	001B  88 26 0007r	     MOV TABLA300[4], AH
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:52	    Page 2
+pract1c.asm
+
+
+
+     55	001F  A2 0008r		     MOV TABLA300[5], AL
+     56				     ;Copiar el	byte más significativo	de BEBA	a la variable VIVA_SBM2023
+     57	0022  88 26 0000r	     MOV VIVA_SBM2023, AH
+     58				     ; FIN DEL PROGRAMA
+     59	0026  B8 4C00		     MOV AX, 4C00H
+     60	0029  CD 21		     INT 21H
+     61	002B			     INICIO ENDP
+     62				     ; FIN DEL SEGMENTO	DE CODIGO
+     63	002B			     CODE ENDS
+     64				     ; FIN DEL PROGRAMA	INDICANDO DONDE	COMIENZA LA EJECUCION
+     65				     END INICIO
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:52	    Page 3
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/10/23"
+??FILENAME			  Text	 "pract1c "
+??TIME				  Text	 "00:32:52"
+??VERSION			  Number 0200
+@CPU				  Text	 0101H
+@CURSEG				  Text	 CODE
+@FILENAME			  Text	 PRACT1C
+@WORDSIZE			  Text	 2
+BEBA				  Word	 DATOS:0001
+ERRORTOTAL2			  Byte	 DATOS:012F
+INICIO				  Near	 CODE:0000
+RESULT				  Word	 EXTRA:0000
+TABLA300			  Byte	 DATOS:0003
+VIVA_SBM2023			  Byte	 DATOS:0000
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+CODE				  16  002B Para	  none
+DATOS				  16  014F Para	  none
+EXTRA				  16  0004 Para	  none
+PILA				  16  0040 Para	  Stack	  STACK
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:52	    Page 4
+Error Summary
+
+
+
+**Error** pract1c.asm(12) Need left parenthesis
+**Error** pract1c.asm(45) Operand types	do not match
+**Error** pract1c.asm(46) Operand types	do not match
+

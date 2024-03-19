@@ -1,0 +1,11 @@
+all: examen.exe
+
+examen.exe: examen.obj
+	tlink /v examen.obj
+examen.obj: examen.asm
+	tasm /zi examen.asm
+
+del:
+del examen.obj
+del examen.exe
+

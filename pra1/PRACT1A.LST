@@ -1,0 +1,108 @@
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:51	    Page 1
+pract1a.asm
+
+
+
+      1				     ;**************************************************************************
+      2				     ; DEFINICION DEL SEGMENTO DE DATOS
+      3	0000			     DATOS SEGMENT
+      4				     ;-- rellenar con los datos	solicitados
+      5	0000			     DATOS ENDS
+      6				     ;**************************************************************************
+      7				     ; DEFINICION DEL SEGMENTO DE PILA
+      8	0000			     PILA SEGMENT STACK	"STACK"
+      9	0000  40*(00)		     DB	40H DUP	(0) ;ejemplo de	inicialización, 64 bytes inicializados	a 0
+     10	0040			     PILA ENDS
+     11				     ;**************************************************************************
+     12				     ; DEFINICION DEL SEGMENTO EXTRA
+     13	0000			     EXTRA SEGMENT
+     14	0000  0000 0000		     RESULT DW 0,0 ;ejemplo de inicialización.	2 PALABRAS (4 BYTES)
+     15	0004			     EXTRA ENDS
+     16				     ;**************************************************************************
+     17				     ; DEFINICION DEL SEGMENTO DE CODIGO
+     18	0000			     CODE SEGMENT
+     19				     ASSUME CS:	CODE, DS: DATOS, ES: EXTRA, SS:	PILA
+     20				     ; COMIENZO	DEL PROCEDIMIENTO PRINCIPAL
+     21	0000			     INICIO PROC
+     22				     ; INICIALIZA LOS REGISTROS	DE SEGMENTO CON	SU VALOR
+     23	0000  B8 0000s		     MOV AX, DATOS
+     24	0003  8E D8		     MOV DS, AX
+     25	0005  B8 0000s		     MOV AX, PILA
+     26	0008  8E D0		     MOV SS, AX
+     27	000A  B8 0000s		     MOV AX, EXTRA
+     28	000D  8E C0		     MOV ES, AX
+     29	000F  BC 0040		     MOV SP, 64	; CARGA	EL PUNTERO DE PILA CON EL VALOR	MAS ALTO
+     30				     ; FIN DE LAS INICIALIZACIONES
+     31				     ; COMIENZO	DEL PROGRAMA
+     32	0012  B8 4BB4		     MOV AX, 4BB4H
+     33					     ;Cargar CFH en BH
+     34	0015  B7 CF			     MOV BH, 0CFH
+     35					     ;Cargar 3412H en DX
+     36	0017  BA 3412			     MOV DX, 3412H
+     37					     ;Cargar -23 en BL
+     38	001A  B3 E9			     MOV BL, -23
+     39					     ;Cargar 11001011b en ES
+     40	001C  BA 00CB			     MOV DX, 0CBH
+     41	001F  8E C2			     MOV ES, DX
+     42					     ;Cargar FABAH en DS
+     43	0021  BA FABA			     MOV DX, 0FABAH
+     44	0024  8E DA			     MOV DS, DX
+     45					     ;Cargar el	contenido de DX	en [BX]+15
+     46	0026  89 57 0F			     MOV DS:[BX]+15, DX
+     47					     ;Cargar en	DH el contenido	de la posición	de memoria 51222H y
+     48					     ;en DL en contenido de la posición 51223H
+     49	0029  B8 5000			     MOV AX, 5000H
+     50	002C  8E D8			     MOV DS, AX
+     51	002E  8A 36 1222		     MOV DH, DS:[1222H]
+     52
+     53	0032  B8 5000			     MOV AX, 5000H
+     54	0035  8E D8			     MOV DS, AX
+     55	0037  8A 16 1223		     MOV DL, DS:[1223H]
+     56					     ;Cargar en	la posición de	memoria	70007H el contenido de DH
+     57	003B  B8 7000			     MOV AX, 7000H
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:51	    Page 2
+pract1a.asm
+
+
+
+     58	003E  8E D8			     MOV DS, AX
+     59	0040  88 36 0007		     MOV BYTE PTR DS:[0007H], DH
+     60					     ;Cargar en	AX el contenido	de la dirección de memoria apuntada por SI
+     61	0044  8B 04			     MOV AX, DS:[SI]
+     62					     ;Cargar en	BX el contenido	de la dirección de memoria que	está
+     63					     ;10B por encima de	la dirección apuntada por BP
+     64	0046  3E: 8B 5E	0A		     MOV BX, DS:[BP]+10
+     65				     ; FIN DEL PROGRAMA
+     66	004A  B8 4C00		     MOV AX, 4C00H
+     67	004D  CD 21		     INT 21H
+     68	004F			     INICIO ENDP
+     69				     ; FIN DEL SEGMENTO	DE CODIGO
+     70	004F			     CODE ENDS
+     71				     ; FIN DEL PROGRAMA	INDICANDO DONDE	COMIENZA LA EJECUCION
+     72				     END INICIO
+Turbo Assembler	 Version 2.0	    03/10/23 00:32:51	    Page 3
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/10/23"
+??FILENAME			  Text	 "pract1a "
+??TIME				  Text	 "00:32:51"
+??VERSION			  Number 0200
+@CPU				  Text	 0101H
+@CURSEG				  Text	 CODE
+@FILENAME			  Text	 PRACT1A
+@WORDSIZE			  Text	 2
+INICIO				  Near	 CODE:0000
+RESULT				  Word	 EXTRA:0000
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+CODE				  16  004F Para	  none
+DATOS				  16  0000 Para	  none
+EXTRA				  16  0004 Para	  none
+PILA				  16  0040 Para	  Stack	  STACK
+

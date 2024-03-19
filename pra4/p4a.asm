@@ -1,0 +1,181 @@
+;**************************************************************************
+;SISTEMAS BASADOS EN MICROPROCESADORES 2291
+;PRÁCTICA 4
+;EDUARDO JUNOY ORTEGA
+;**************************************************************************
+
+CODIGO SEGMENT		;Define un segmento de código llamado "codigo".
+ASSUME CS: CODIGO	;Asume que el registro de segmento de código (CS) apunta al segmento de código llamado "codigo".
+ORG 256				;Define el origen de la dirección de inicio en 256 (100h).
+
+INICIO: JMP MAIN
+
+; Variables globales
+VECTOR_INFO db 13, 10, "Eduardo Junoy Ortega", 13, 10, "Instrucciones:", 13, 10, "-Escribe /I para instalar el driver // Escribe /D para desinstalar", 13, 10, '$' ;Contiene información del autor y las instrucciones. 
+VECTOR_55I db 13, 10, "VECTOR_55 instalado", '$' 
+VECTOR_55D db 13, 10, "VECTOR_55 no instalado", '$' ;Contienen mensajes sobre el estado del vector de interrupción 55h
+POLIBIO_STR db 'ABCDEFGHIKLMNOPQRSTUVWXYZ', '$'
+
+MAIN:
+MOV SI, 80H
+MOV CX, 0
+
+MOV CL, [SI]
+CMP CX, 0
+JE NO_PARAMETERS
+
+ADD SI, 2
+MOV CL, [SI]
+CMP CL, '/'
+JNE MAIN_END
+
+INC SI
+MOV CL, [SI]
+
+CMP CL, 'I'
+JE INSTALL_OPT
+CMP CL, 'D'
+JE UNINSTALL_OPT
+JMP MAIN_END
+
+INSTALL_OPT:
+CALL INSTALL
+JMP MAIN_END
+
+UNINSTALL_OPT:
+CALL UNINSTALL
+JMP MAIN_END
+
+NO_PARAMETERS:
+CALL CHECK_STATE
+JMP MAIN_END
+
+MAIN_END:
+MOV AX, 4C00H
+INT 21H
+
+RSI_POLIBIO PROC
+MOV SI, DX
+CMP AH, 11H
+JE PRINT_CODED
+CMP AH, 22H
+JE END_POLIBIO
+
+PRINT_CODED:
+MOV BX, 0
+MOV CX, 0
+MOV DX, [SI]
+CMP DX, '$'
+JE END_POLIBIO
+MOV DI, OFFSET POLIBIO_STR
+LOOP_CODED:
+CMP BX, 5
+JE PRINT_CODED_R
+
+MOV AX, [DI]
+CMP AX, [SI]
+JE ENCODE
+CMP CX, 5
+JE RESET_C_INC_F
+INC DI
+INC CX
+JMP LOOP_CODED
+
+RESET_C_INC_F:
+MOV CX, 0
+INC BX
+INC DI
+JMP LOOP_CODED
+
+JMP LOOP_CODED
+ENCODE:
+MOV AH, 2
+INC BX
+MOV DL, BL
+INT 21H
+INC CX
+MOV DL, CL
+INT 21H
+MOV DL, ' '
+INT 21H
+INC SI
+JMP PRINT_CODED
+
+PRINT_CODED_R:
+INC SI
+JMP PRINT_CODED
+
+END_POLIBIO:
+IRET
+RSI_POLIBIO ENDP
+
+INSTALL PROC
+MOV AX, 0
+MOV ES, AX
+MOV BX, CS
+MOV AX, OFFSET RSI_POLIBIO
+
+CLI
+MOV ES:[55H*4], AX
+MOV ES:[55H*4+2], BX
+STI
+MOV DX, OFFSET UNINSTALL
+INT 27H
+RET
+INSTALL ENDP
+
+UNINSTALL PROC
+PUSH CX BX ES DS AX
+
+MOV CX, 0
+MOV DS, CX
+
+MOV ES, DS:[55H*4+2]
+MOV BX, ES:[2CH]
+
+MOV AH, 49H
+INT 21H
+MOV ES, BX
+INT 21H
+
+CLI
+MOV DS:[55H*4], CX
+MOV DS:[55H*4+2], CX
+STI
+
+POP AX DS ES BX CX
+RET
+UNINSTALL ENDP
+
+CHECK_STATE PROC
+MOV AX, 0
+MOV ES, AX
+
+MOV AX, ES:[55H*4]
+MOV BX, ES:[55H*4+2]
+CMP AX, 0
+JNE VECTOR_55_INSTALLED
+CMP BX, 0
+JNE VECTOR_55_INSTALLED
+
+MOV AH, 9
+MOV DX, OFFSET VECTOR_55D
+INT 21H
+JMP CHECK_END
+
+VECTOR_55_INSTALLED:
+MOV AH, 9
+MOV DX, OFFSET VECTOR_55I
+INT 21H
+JMP CHECK_END
+
+CHECK_END:
+MOV AH, 9
+MOV DX, OFFSET VECTOR_INFO
+INT 21H
+RET
+CHECK_STATE ENDP
+
+codigo ENDS
+
+END inicio
