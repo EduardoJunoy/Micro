@@ -12,5 +12,7 @@ Las entregas de prácticas son individuales, pero para su realización ha sido i
 
 **Autor/es: Eduardo Junoy, Carlos García Santa y Joaquín Abad**
 
+https://github.com/santacg
+
 Descripción:
 Repositorio con los archivos generados durante la realización de los ejercicios de Sistemas Basados en Microprocesadores como preparación a los exámenes.
